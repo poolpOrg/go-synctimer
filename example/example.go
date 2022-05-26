@@ -12,31 +12,14 @@ func main() {
 	wg := sync.WaitGroup{}
 
 	t := synctimer.NewTimer()
-
-	wg.Add(1)
-	c1 := t.NewSubTimer(5 * time.Second)
-	go func() {
-		<-c1
-		fmt.Println("wake up #1!")
-		wg.Done()
-	}()
-
-	wg.Add(1)
-	c2 := t.NewSubTimer(5 * time.Second)
-	go func() {
-		<-c2
-		fmt.Println("wake up #2!")
-		wg.Done()
-	}()
-
-	wg.Add(1)
-	c3 := t.NewSubTimer(6 * time.Second)
-	go func() {
-		<-c3
-		fmt.Println("wake up #3!")
-		wg.Done()
-	}()
-
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func(id int, c chan bool) {
+			<-c
+			fmt.Println("woke up subtimer", id)
+			wg.Done()
+		}(i, t.NewSubTimer(time.Duration(i)*time.Second))
+	}
 	t.Start()
 	wg.Wait()
 }
